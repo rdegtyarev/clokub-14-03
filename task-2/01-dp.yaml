@@ -1,0 +1,43 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-map-demo
+  labels:
+    role: config-map-demo
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      role: config-map-demo
+  template:
+    metadata:
+      labels:
+        role: config-map-demo
+    spec:
+      containers:
+        - image: rdegtyarev/fedora-pip:0.2.0
+          imagePullPolicy: Always
+          name: fedora-app
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          env:
+            - name: CM_ENV_DEMO
+              valueFrom:
+                configMapKeyRef:
+                  name: demo-config-map
+                  key: cm-demo-env
+          command: ["/bin/sleep", "365d"]
+          volumeMounts:
+            - mountPath: /config/
+              name: demo-config
+      volumes:
+        - name: demo-config
+          configMap:
+            name: demo-config-map
